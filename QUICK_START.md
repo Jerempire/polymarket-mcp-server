@@ -10,10 +10,10 @@ Your environment is ready to go. Here's how to use it:
 
 ```bash
 # On Linux/Mac
-source venv/bin/activate
+source polymarket/bin/activate
 
 # On Windows
-venv\Scripts\activate
+polymarket\Scripts\activate
 ```
 
 ---
@@ -45,7 +45,7 @@ POLYGON_ADDRESS=0xYourAddressHere
 
 ```bash
 # Activate venv first
-source venv/bin/activate
+source polymarket/bin/activate
 
 # Run the script
 python get_realtime_market_data.py
@@ -281,7 +281,7 @@ MAX_SPREAD_TOLERANCE=0.05         # Max 5% spread
 
 ### Issue: Command not found
 ```bash
-source venv/bin/activate
+source polymarket/bin/activate
 ```
 
 ### Issue: Import errors
@@ -311,7 +311,7 @@ Built-in rate limiting handles this automatically
 
 ```bash
 # 1. Activate venv
-source venv/bin/activate
+source polymarket/bin/activate
 
 # 2. Run the script
 python get_realtime_market_data.py

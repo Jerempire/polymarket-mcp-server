@@ -21,14 +21,14 @@ git pull origin claude/read-review-code-i19iC
 
 ```bash
 # Create virtual environment
-python3 -m venv venv
+python3 -m venv polymarket
 
 # Activate it
 # On Mac/Linux:
-source venv/bin/activate
+source polymarket/bin/activate
 
 # On Windows:
-venv\Scripts\activate
+polymarket\Scripts\activate
 ```
 
 ### Step 3: Install Dependencies
@@ -81,8 +81,8 @@ POLYGON_ADDRESS=0xYourAddressHere
 ### Step 5: Run the Real-Time Data Script
 
 ```bash
-# Make sure venv is activated
-source venv/bin/activate
+# Make sure polymarket env is activated
+source polymarket/bin/activate
 
 # Run the script
 python get_realtime_market_data.py
@@ -105,7 +105,7 @@ polymarket-mcp-server/
 ├── get_realtime_market_data.py   ← Main script to run
 ├── run.sh                         ← Easy run script
 ├── QUICK_START.md                 ← Quick reference
-├── venv/                          ← Virtual environment
+├── polymarket/                          ← Virtual environment
 └── src/polymarket_mcp/
     └── tools/
         ├── market_discovery.py    ← Market search tools
@@ -217,7 +217,7 @@ asyncio.run(main())
 
 ### Issue: "Module not found"
 ```bash
-source venv/bin/activate
+source polymarket/bin/activate
 pip install -e .
 ```
 
@@ -283,7 +283,7 @@ cp .env.example .env
 **On your local machine:**
 
 1. ✅ Pull the code
-2. ✅ Create venv
+2. ✅ Create polymarket environment
 3. ✅ Install dependencies
 4. ✅ Edit `.env` file
 5. ✅ Run `python get_realtime_market_data.py`

@@ -5,17 +5,17 @@ echo "🚀 Polymarket MCP - Real-Time Data"
 echo "=================================="
 echo ""
 
-# Check if venv exists
-if [ ! -d "venv" ]; then
+# Check if polymarket env exists
+if [ ! -d "polymarket" ]; then
     echo "⚠️  Virtual environment not found. Creating..."
-    python3 -m venv venv
-    source venv/bin/activate
+    python3 -m venv polymarket
+    source polymarket/bin/activate
     pip install --upgrade pip -q
     pip install -e . -q
     echo "✅ Virtual environment created!"
 else
     echo "✅ Virtual environment found"
-    source venv/bin/activate
+    source polymarket/bin/activate
 fi
 
 echo ""
