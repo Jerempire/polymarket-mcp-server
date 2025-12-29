@@ -25,6 +25,7 @@ MANIFEST
 
 # Virtual Environment
 venv/
+polymarket/
 env/
 ENV/
 env.bak/

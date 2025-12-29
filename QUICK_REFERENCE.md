@@ -108,7 +108,7 @@ chmod +x install.sh
 
 ### Module Not Found
 ```bash
-source venv/bin/activate
+source polymarket/bin/activate
 pip install -e .
 ```
 
@@ -125,7 +125,7 @@ pip install -e .
 | Config (Windows) | `%APPDATA%\Claude\claude_desktop_config.json` |
 | Config (Linux) | `~/.config/Claude/claude_desktop_config.json` |
 | Environment | `.env` (project root) |
-| Virtual Env | `venv/` (project root) |
+| Virtual Env | `polymarket/` (project root) |
 
 ## Safety Limits
 

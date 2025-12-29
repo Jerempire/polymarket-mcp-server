@@ -29,7 +29,7 @@ NC='\033[0m' # No Color
 DEMO_MODE=false
 SKIP_CLAUDE_CONFIG=false
 INSTALL_DIR=$(pwd)
-VENV_DIR="$INSTALL_DIR/venv"
+VENV_DIR="$INSTALL_DIR/polymarket"
 PYTHON_MIN_VERSION="3.10"
 
 ################################################################################
@@ -156,7 +156,7 @@ activate_virtualenv() {
     elif [ -f "$VENV_DIR/Scripts/activate" ]; then
         source "$VENV_DIR/Scripts/activate"
     else
-        print_error "Could not find venv activation script"
+        print_error "Could not find polymarket env activation script"
         exit 1
     fi
 }

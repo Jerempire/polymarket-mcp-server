@@ -256,8 +256,8 @@ polymarket-mcp/
 ```bash
 git clone https://github.com/caiovicentino/polymarket-mcp-server.git
 cd polymarket-mcp-server
-python -m venv venv
-source venv/bin/activate
+python -m venv polymarket
+source polymarket/bin/activate
 pip install -e .
 python setup_wizard.py
 ```
