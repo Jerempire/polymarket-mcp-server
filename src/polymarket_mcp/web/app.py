@@ -292,7 +292,10 @@ async def get_trending_markets(limit: int = 10):
         markets = await market_discovery.get_trending_markets(limit=limit)
         stats["markets_viewed"] += 1
 
-        return JSONResponse({"markets": markets})
+        # Normalize market data for frontend
+        normalized_markets = [normalize_market_data(m) for m in markets]
+
+        return JSONResponse({"markets": normalized_markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -309,7 +312,10 @@ async def search_markets(q: str, limit: int = 20):
         markets = await market_discovery.search_markets(query=q, limit=limit)
         stats["markets_viewed"] += 1
 
-        return JSONResponse({"markets": markets})
+        # Normalize market data for frontend
+        normalized_markets = [normalize_market_data(m) for m in markets]
+
+        return JSONResponse({"markets": normalized_markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -419,6 +425,37 @@ async def get_stats():
     })
 
 
+def normalize_market_data(market: dict) -> dict:
+    """Normalize market data to consistent format for frontend"""
+    # Extract outcome prices if available
+    outcomes = market.get("outcomes", [])
+    price_yes = 0
+    price_no = 0
+
+    if len(outcomes) >= 2:
+        # First outcome is usually YES, second is NO
+        price_yes = float(outcomes[0].get("price", 0) or 0)
+        price_no = float(outcomes[1].get("price", 0) or 0)
+
+    # Calculate spread
+    spread = abs(price_yes - price_no) if price_yes and price_no else 0
+
+    return {
+        "id": market.get("id"),
+        "condition_id": market.get("conditionId") or market.get("condition_id"),
+        "question": market.get("question"),
+        "description": market.get("description"),
+        "price_yes": price_yes,
+        "price_no": price_no,
+        "volume_24h": float(market.get("volume24hr", 0) or 0),
+        "volume": float(market.get("volume", 0) or 0),
+        "liquidity": float(market.get("liquidity", 0) or 0),
+        "spread": spread,
+        "end_date": market.get("endDate"),
+        "active": market.get("active"),
+    }
+
+
 @app.get("/api/tracker/trending")
 async def get_tracker_trending(limit: int = 20):
     """Get trending markets for tracker dashboard"""
@@ -431,7 +468,10 @@ async def get_tracker_trending(limit: int = 20):
         )
         stats["markets_viewed"] += 1
 
-        return JSONResponse({"markets": markets})
+        # Normalize market data for frontend
+        normalized_markets = [normalize_market_data(m) for m in markets]
+
+        return JSONResponse({"markets": normalized_markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -451,7 +491,10 @@ async def get_tracker_politics(limit: int = 20):
         )
         stats["markets_viewed"] += 1
 
-        return JSONResponse({"markets": markets})
+        # Normalize market data for frontend
+        normalized_markets = [normalize_market_data(m) for m in markets]
+
+        return JSONResponse({"markets": normalized_markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -468,7 +511,10 @@ async def get_tracker_sports(limit: int = 20):
         markets = await market_discovery.get_sports_markets(limit=limit)
         stats["markets_viewed"] += 1
 
-        return JSONResponse({"markets": markets})
+        # Normalize market data for frontend
+        normalized_markets = [normalize_market_data(m) for m in markets]
+
+        return JSONResponse({"markets": normalized_markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -485,7 +531,10 @@ async def get_tracker_crypto(limit: int = 20):
         markets = await market_discovery.get_crypto_markets(limit=limit)
         stats["markets_viewed"] += 1
 
-        return JSONResponse({"markets": markets})
+        # Normalize market data for frontend
+        normalized_markets = [normalize_market_data(m) for m in markets]
+
+        return JSONResponse({"markets": normalized_markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -505,7 +554,10 @@ async def get_tracker_closing_soon(hours: int = 48, limit: int = 20):
         )
         stats["markets_viewed"] += 1
 
-        return JSONResponse({"markets": markets})
+        # Normalize market data for frontend
+        normalized_markets = [normalize_market_data(m) for m in markets]
+
+        return JSONResponse({"markets": normalized_markets})
 
     except Exception as e:
         stats["errors"] += 1
