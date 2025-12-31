@@ -537,14 +537,16 @@
         }
 
         function formatCompactCurrency(value) {
-            if (!value || value === 0) return '$0';
+            // Convert to number and handle invalid values
+            const num = parseFloat(value);
+            if (isNaN(num) || num === 0) return '$0';
 
-            if (value >= 1000000) {
-                return '$' + (value / 1000000).toFixed(1) + 'M';
-            } else if (value >= 1000) {
-                return '$' + (value / 1000).toFixed(1) + 'K';
+            if (num >= 1000000) {
+                return '$' + (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return '$' + (num / 1000).toFixed(1) + 'K';
             } else {
-                return '$' + value.toFixed(0);
+                return '$' + num.toFixed(0);
             }
         }
 

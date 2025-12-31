@@ -58,8 +58,9 @@ function showNotification(message, type = 'info') {
  * @returns {string} Formatted number
  */
 function formatNumber(num) {
-    if (num === null || num === undefined) return '0';
-    return num.toLocaleString('en-US', {
+    const number = parseFloat(num);
+    if (isNaN(number)) return '0';
+    return number.toLocaleString('en-US', {
         maximumFractionDigits: 0
     });
 }
@@ -85,8 +86,9 @@ function formatCurrency(amount) {
  * @returns {string} Formatted price
  */
 function formatPrice(price) {
-    if (price === null || price === undefined) return 'N/A';
-    return `${(price * 100).toFixed(1)}%`;
+    const num = parseFloat(price);
+    if (isNaN(num)) return 'N/A';
+    return `${(num * 100).toFixed(1)}%`;
 }
 
 /**
@@ -95,8 +97,9 @@ function formatPrice(price) {
  * @returns {string} Formatted percentage
  */
 function formatPercent(value) {
-    if (value === null || value === undefined) return '0%';
-    return `${(value * 100).toFixed(2)}%`;
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0%';
+    return `${(num * 100).toFixed(2)}%`;
 }
 
 /**
