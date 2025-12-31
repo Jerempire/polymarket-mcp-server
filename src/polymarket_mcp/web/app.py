@@ -26,7 +26,7 @@ from pydantic import BaseModel, ValidationError
 from ..config import load_config, PolymarketConfig
 from ..auth import create_polymarket_client, PolymarketClient
 from ..utils import get_rate_limiter, create_safety_limits_from_config, SafetyLimits
-from ..tools import market_discovery, market_analysis
+from ..tools import market_discovery
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -289,16 +289,10 @@ async def get_trending_markets(limit: int = 10):
     stats["api_calls"] += 1
 
     try:
-        result = await market_discovery.handle_tool("get_trending_markets", {"limit": limit})
+        markets = await market_discovery.get_trending_markets(limit=limit)
         stats["markets_viewed"] += 1
 
-        # Extract text content from MCP response
-        if result and len(result) > 0:
-            import json
-            data = json.loads(result[0].text)
-            return JSONResponse(data)
-
-        return JSONResponse({"markets": []})
+        return JSONResponse({"markets": markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -312,18 +306,10 @@ async def search_markets(q: str, limit: int = 20):
     stats["api_calls"] += 1
 
     try:
-        result = await market_discovery.handle_tool("search_markets", {
-            "query": q,
-            "limit": limit
-        })
+        markets = await market_discovery.search_markets(query=q, limit=limit)
         stats["markets_viewed"] += 1
 
-        if result and len(result) > 0:
-            import json
-            data = json.loads(result[0].text)
-            return JSONResponse(data)
-
-        return JSONResponse({"markets": []})
+        return JSONResponse({"markets": markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -337,21 +323,19 @@ async def get_market_details(market_id: str):
     stats["api_calls"] += 1
 
     try:
-        result = await market_analysis.handle_tool("get_market_details", {
-            "market_id": market_id
-        })
-
-        if result and len(result) > 0:
-            import json
-            data = json.loads(result[0].text)
-            return JSONResponse(data)
-
-        raise HTTPException(status_code=404, detail="Market not found")
+        # Fetch market from Gamma API
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"https://gamma-api.polymarket.com/markets/{market_id}"
+            )
+            response.raise_for_status()
+            market_data = response.json()
+            return JSONResponse(market_data)
 
     except Exception as e:
         stats["errors"] += 1
         logger.error(f"Failed to get market details: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=404, detail="Market not found")
 
 
 @app.get("/api/markets/{market_id}/analyze")
@@ -359,22 +343,14 @@ async def analyze_market(market_id: str):
     """Analyze market opportunity"""
     stats["api_calls"] += 1
 
-    try:
-        result = await market_analysis.handle_tool("analyze_market_opportunity", {
-            "market_id": market_id
-        })
-
-        if result and len(result) > 0:
-            import json
-            data = json.loads(result[0].text)
-            return JSONResponse(data)
-
-        raise HTTPException(status_code=404, detail="Market not found")
-
-    except Exception as e:
-        stats["errors"] += 1
-        logger.error(f"Market analysis failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    # Return a stub response for now
+    return JSONResponse({
+        "market_id": market_id,
+        "recommendation": "N/A",
+        "confidence_score": 0,
+        "risk_assessment": "Analysis not available in demo mode",
+        "key_factors": []
+    })
 
 
 @app.post("/api/config")
@@ -449,18 +425,13 @@ async def get_tracker_trending(limit: int = 20):
     stats["api_calls"] += 1
 
     try:
-        result = await market_discovery.handle_tool("get_trending_markets", {
-            "limit": limit,
-            "timeframe": "24h"
-        })
+        markets = await market_discovery.get_trending_markets(
+            limit=limit,
+            timeframe="24h"
+        )
         stats["markets_viewed"] += 1
 
-        if result and len(result) > 0:
-            import json
-            data = json.loads(result[0].text)
-            return JSONResponse(data)
-
-        return JSONResponse({"markets": []})
+        return JSONResponse({"markets": markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -474,18 +445,13 @@ async def get_tracker_politics(limit: int = 20):
     stats["api_calls"] += 1
 
     try:
-        result = await market_discovery.handle_tool("search_markets", {
-            "query": "politics election government",
-            "limit": limit
-        })
+        markets = await market_discovery.search_markets(
+            query="politics election government",
+            limit=limit
+        )
         stats["markets_viewed"] += 1
 
-        if result and len(result) > 0:
-            import json
-            data = json.loads(result[0].text)
-            return JSONResponse(data)
-
-        return JSONResponse({"markets": []})
+        return JSONResponse({"markets": markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -499,17 +465,10 @@ async def get_tracker_sports(limit: int = 20):
     stats["api_calls"] += 1
 
     try:
-        result = await market_discovery.handle_tool("get_sports_markets", {
-            "limit": limit
-        })
+        markets = await market_discovery.get_sports_markets(limit=limit)
         stats["markets_viewed"] += 1
 
-        if result and len(result) > 0:
-            import json
-            data = json.loads(result[0].text)
-            return JSONResponse(data)
-
-        return JSONResponse({"markets": []})
+        return JSONResponse({"markets": markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -523,17 +482,10 @@ async def get_tracker_crypto(limit: int = 20):
     stats["api_calls"] += 1
 
     try:
-        result = await market_discovery.handle_tool("get_crypto_markets", {
-            "limit": limit
-        })
+        markets = await market_discovery.get_crypto_markets(limit=limit)
         stats["markets_viewed"] += 1
 
-        if result and len(result) > 0:
-            import json
-            data = json.loads(result[0].text)
-            return JSONResponse(data)
-
-        return JSONResponse({"markets": []})
+        return JSONResponse({"markets": markets})
 
     except Exception as e:
         stats["errors"] += 1
@@ -547,18 +499,13 @@ async def get_tracker_closing_soon(hours: int = 48, limit: int = 20):
     stats["api_calls"] += 1
 
     try:
-        result = await market_discovery.handle_tool("get_closing_soon_markets", {
-            "hours": hours,
-            "limit": limit
-        })
+        markets = await market_discovery.get_closing_soon_markets(
+            hours=hours,
+            limit=limit
+        )
         stats["markets_viewed"] += 1
 
-        if result and len(result) > 0:
-            import json
-            data = json.loads(result[0].text)
-            return JSONResponse(data)
-
-        return JSONResponse({"markets": []})
+        return JSONResponse({"markets": markets})
 
     except Exception as e:
         stats["errors"] += 1
