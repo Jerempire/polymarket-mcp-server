@@ -427,33 +427,38 @@ async def get_stats():
 
 def normalize_market_data(market: dict) -> dict:
     """Normalize market data to consistent format for frontend"""
-    # Extract outcome prices if available
-    outcomes = market.get("outcomes", [])
-    price_yes = 0
-    price_no = 0
+    try:
+        # Extract outcome prices if available
+        outcomes = market.get("outcomes", [])
+        price_yes = 0
+        price_no = 0
 
-    if len(outcomes) >= 2:
-        # First outcome is usually YES, second is NO
-        price_yes = float(outcomes[0].get("price", 0) or 0)
-        price_no = float(outcomes[1].get("price", 0) or 0)
+        if len(outcomes) >= 2:
+            # First outcome is usually YES, second is NO
+            price_yes = float(outcomes[0].get("price", 0) or 0)
+            price_no = float(outcomes[1].get("price", 0) or 0)
 
-    # Calculate spread
-    spread = abs(price_yes - price_no) if price_yes and price_no else 0
+        # Calculate spread
+        spread = abs(price_yes - price_no) if price_yes and price_no else 0
 
-    return {
-        "id": market.get("id"),
-        "condition_id": market.get("conditionId") or market.get("condition_id"),
-        "question": market.get("question"),
-        "description": market.get("description"),
-        "price_yes": price_yes,
-        "price_no": price_no,
-        "volume_24h": float(market.get("volume24hr", 0) or 0),
-        "volume": float(market.get("volume", 0) or 0),
-        "liquidity": float(market.get("liquidity", 0) or 0),
-        "spread": spread,
-        "end_date": market.get("endDate"),
-        "active": market.get("active"),
-    }
+        return {
+            "id": market.get("id"),
+            "condition_id": market.get("conditionId") or market.get("condition_id"),
+            "question": market.get("question"),
+            "description": market.get("description"),
+            "price_yes": price_yes,
+            "price_no": price_no,
+            "volume_24h": float(market.get("volume24hr", 0) or 0),
+            "volume": float(market.get("volume", 0) or 0),
+            "liquidity": float(market.get("liquidity", 0) or 0),
+            "spread": spread,
+            "end_date": market.get("endDate"),
+            "active": market.get("active"),
+        }
+    except Exception as e:
+        logger.error(f"Error normalizing market data: {e}, market: {market}")
+        # Return market as-is if normalization fails
+        return market
 
 
 @app.get("/api/tracker/trending")
