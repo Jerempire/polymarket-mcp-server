@@ -220,6 +220,16 @@ async def monitoring_page(request: Request):
     })
 
 
+@app.get("/tracker", response_class=HTMLResponse)
+async def tracker_page(request: Request):
+    """Market tracker dashboard page"""
+    stats["requests_total"] += 1
+
+    return templates.TemplateResponse("tracker.html", {
+        "request": request,
+    })
+
+
 # ============================================================================
 # API Endpoints
 # ============================================================================
@@ -431,6 +441,129 @@ async def get_stats():
         "uptime": str(datetime.now() - stats["uptime_start"]).split('.')[0],
         "uptime_seconds": (datetime.now() - stats["uptime_start"]).total_seconds(),
     })
+
+
+@app.get("/api/tracker/trending")
+async def get_tracker_trending(limit: int = 20):
+    """Get trending markets for tracker dashboard"""
+    stats["api_calls"] += 1
+
+    try:
+        result = await market_discovery.handle_tool("get_trending_markets", {
+            "limit": limit,
+            "timeframe": "24h"
+        })
+        stats["markets_viewed"] += 1
+
+        if result and len(result) > 0:
+            import json
+            data = json.loads(result[0].text)
+            return JSONResponse(data)
+
+        return JSONResponse({"markets": []})
+
+    except Exception as e:
+        stats["errors"] += 1
+        logger.error(f"Failed to get trending markets: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/tracker/politics")
+async def get_tracker_politics(limit: int = 20):
+    """Get politics markets for tracker dashboard"""
+    stats["api_calls"] += 1
+
+    try:
+        result = await market_discovery.handle_tool("search_markets", {
+            "query": "politics election government",
+            "limit": limit
+        })
+        stats["markets_viewed"] += 1
+
+        if result and len(result) > 0:
+            import json
+            data = json.loads(result[0].text)
+            return JSONResponse(data)
+
+        return JSONResponse({"markets": []})
+
+    except Exception as e:
+        stats["errors"] += 1
+        logger.error(f"Failed to get politics markets: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/tracker/sports")
+async def get_tracker_sports(limit: int = 20):
+    """Get sports markets for tracker dashboard"""
+    stats["api_calls"] += 1
+
+    try:
+        result = await market_discovery.handle_tool("get_sports_markets", {
+            "limit": limit
+        })
+        stats["markets_viewed"] += 1
+
+        if result and len(result) > 0:
+            import json
+            data = json.loads(result[0].text)
+            return JSONResponse(data)
+
+        return JSONResponse({"markets": []})
+
+    except Exception as e:
+        stats["errors"] += 1
+        logger.error(f"Failed to get sports markets: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/tracker/crypto")
+async def get_tracker_crypto(limit: int = 20):
+    """Get crypto markets for tracker dashboard"""
+    stats["api_calls"] += 1
+
+    try:
+        result = await market_discovery.handle_tool("get_crypto_markets", {
+            "limit": limit
+        })
+        stats["markets_viewed"] += 1
+
+        if result and len(result) > 0:
+            import json
+            data = json.loads(result[0].text)
+            return JSONResponse(data)
+
+        return JSONResponse({"markets": []})
+
+    except Exception as e:
+        stats["errors"] += 1
+        logger.error(f"Failed to get crypto markets: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/tracker/closing-soon")
+async def get_tracker_closing_soon(hours: int = 48, limit: int = 20):
+    """Get markets closing soon for tracker dashboard"""
+    stats["api_calls"] += 1
+
+    try:
+        result = await market_discovery.handle_tool("get_closing_soon_markets", {
+            "hours": hours,
+            "limit": limit
+        })
+        stats["markets_viewed"] += 1
+
+        if result and len(result) > 0:
+            import json
+            data = json.loads(result[0].text)
+            return JSONResponse(data)
+
+        return JSONResponse({"markets": []})
+
+    except Exception as e:
+        stats["errors"] += 1
+        logger.error(f"Failed to get closing soon markets: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================================================
