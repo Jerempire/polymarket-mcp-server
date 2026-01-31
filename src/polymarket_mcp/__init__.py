@@ -1,11 +1,7 @@
 """
-Polymarket MCP Server - Trading integration for Claude Desktop.
+Polymarket Sentiment Analysis MCP Server.
 
-Provides tools and resources for:
-- Market data and analysis
-- Order placement and management
-- Position tracking
-- Risk management
+Read-only tools for market discovery, analysis, and sentiment tracking.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

@@ -1,12 +1,11 @@
-"""Trading and market tools"""
+"""Market discovery, analysis, and sentiment tools"""
 
 from . import market_discovery
 from . import market_analysis
-from .trading import TradingTools, get_tool_definitions
+from . import sentiment_digest
 
 __all__ = [
     "market_discovery",
     "market_analysis",
-    "TradingTools",
-    "get_tool_definitions",
+    "sentiment_digest",
 ]

@@ -234,33 +234,6 @@ async def get_event_markets(
         raise
 
 
-async def get_featured_markets(limit: int = 10) -> List[Dict[str, Any]]:
-    """
-    Get featured or promoted markets.
-
-    Args:
-        limit: Number of markets to return (default 10)
-
-    Returns:
-        Featured markets
-    """
-    try:
-        # Fetch markets with featured flag
-        params = {"featured": "true", "active": "true"}
-        markets = await _fetch_gamma_markets("/markets", params, limit)
-
-        # If no featured flag exists, return highest volume markets
-        if not markets:
-            logger.info("No featured markets found, returning highest volume markets")
-            markets = await get_trending_markets("24h", limit)
-
-        logger.info(f"Found {len(markets)} featured markets")
-        return markets
-
-    except Exception as e:
-        logger.error(f"Failed to get featured markets: {e}")
-        raise
-
 
 async def get_closing_soon_markets(
     hours: int = 24,
@@ -491,21 +464,6 @@ def get_tools() -> List[types.Tool]:
             }
         ),
         types.Tool(
-            name="get_featured_markets",
-            description="Get featured or promoted markets. Returns curated list of important markets.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "description": "Number of markets to return (default 10)",
-                        "default": 10
-                    }
-                },
-                "required": []
-            }
-        ),
-        types.Tool(
             name="get_closing_soon_markets",
             description="Get markets closing within specified timeframe. Returns markets sorted by closing time.",
             inputSchema={
@@ -587,8 +545,6 @@ async def handle_tool(name: str, arguments: Dict[str, Any]) -> List[types.TextCo
             result = await filter_markets_by_category(**arguments)
         elif name == "get_event_markets":
             result = await get_event_markets(**arguments)
-        elif name == "get_featured_markets":
-            result = await get_featured_markets(**arguments)
         elif name == "get_closing_soon_markets":
             result = await get_closing_soon_markets(**arguments)
         elif name == "get_sports_markets":
