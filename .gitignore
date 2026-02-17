@@ -55,6 +55,7 @@ htmlcov/
 
 # Logs
 *.log
+.tmp/
 
 # MCP
 mcp.json

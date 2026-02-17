@@ -1,7 +1,7 @@
 """
-Polymarket Sentiment Analysis MCP Server.
+Market Eagle Eye MCP Server.
 
-Read-only tools for market discovery, analysis, and sentiment tracking.
+Read-only tools for market discovery, sentiment tracking, and narrative ranking.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

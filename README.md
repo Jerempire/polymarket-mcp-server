@@ -1,61 +1,77 @@
-# Polymarket Sentiment Analysis MCP Server
+# Market Eagle Eye MCP Server
 
-Read-only MCP server providing 15 tools for Polymarket sentiment analysis, market discovery, and market data. No wallet, no trading, no authentication required.
+Read-only MCP + dashboard backend for current market narratives and themes, weighted by impact and relevance.
 
-## Tools (15)
+This project extends the original Polymarket sentiment server with:
+- multi-source ingestion adapters (Polymarket, Polygon, Squawk-style feed)
+- API migration fallback layer for Polymarket endpoint changes
+- narrative scoring engine (impact + relevance)
+- dashboard-ready API and lightweight web UI
 
-### Market Discovery (7)
-- `search_markets` - Search by text/keywords
-- `get_trending_markets` - Highest volume markets
-- `filter_markets_by_category` - Filter by category tag
-- `get_event_markets` - All markets for an event
-- `get_featured_markets` - Featured/promoted markets
-- `get_closing_soon_markets` - Markets closing soon
-- `get_sports_markets` / `get_crypto_markets` - Domain-specific
+## Tools (18)
 
-### Market Analysis (5)
-- `get_market_details` - Full market metadata
-- `get_current_price` - Bid/ask prices
-- `get_market_volume` - Volume across timeframes
-- `get_price_history` - Historical data (limited)
-- `compare_markets` - Side-by-side comparison
+### Existing Polymarket Tooling (15)
+- Market discovery (7)
+- Market analysis (5)
+- Sentiment digest (3)
 
-### Sentiment Digest (3)
-- `get_sentiment_digest` - Top movers by category with probability shifts
-- `get_topic_sentiment` - Sentiment for a specific topic
-- `get_biggest_movers` - Largest probability changes
+### Eagle Eye Tools (3)
+- `get_eagle_eye_snapshot` - ranked narratives/themes for the current window
+- `get_theme_breakdown` - event-level support for a selected theme
+- `get_source_health` - source ingestion status and latency
 
-## Setup
+## Quick Start
 
 ```bash
 pip install -e .
 ```
 
-### Claude Desktop Configuration
+Run MCP server:
 
-Add to `claude_desktop_config.json`:
+```bash
+market-eagle-eye-mcp
+```
+
+Run dashboard API/UI:
+
+```bash
+market-eagle-eye-dashboard
+```
+
+Dashboard default URL: `http://127.0.0.1:8070`
+
+## Claude Desktop Configuration
 
 ```json
 {
   "mcpServers": {
-    "polymarket-sentiment": {
-      "command": "polymarket-mcp",
+    "market-eagle-eye": {
+      "command": "market-eagle-eye-mcp",
       "env": {
         "LOG_LEVEL": "INFO",
-        "SENTIMENT_CACHE_TTL_SECONDS": "300"
+        "EAGLE_EYE_WINDOW_MINUTES": "240",
+        "EAGLE_EYE_TOP_NARRATIVES": "12"
       }
     }
   }
 }
 ```
 
-## Configuration
+## Key Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `LOG_LEVEL` | `INFO` | Log verbosity |
-| `SENTIMENT_CACHE_TTL_SECONDS` | `300` | Cache TTL for sentiment data |
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `POLYMARKET_PRIMARY_API_URL` | `https://gamma-api.polymarket.com` | Primary Polymarket base URL |
+| `POLYMARKET_FALLBACK_API_URL` | `https://gamma-api.polymarket.com` | Fallback Polymarket base URL |
+| `POLYMARKET_MARKETS_PATHS` | `/markets,/v1/markets` | Endpoint path fallback list |
+| `POLYGON_API_URL` | `https://api.massive.com` | Massive/Polygon API base URL |
+| `POLYGON_API_KEY` | unset | Enables market-data adapter when set |
+| `SQUAWK_FEED_URL` / `SQUAWK_FEED_FILE` | `https://api.massive.com/benzinga/v2/news` / unset | Squawk/news feed source |
+| `EAGLE_EYE_WINDOW_MINUTES` | `240` | Default lookback window |
+| `EAGLE_EYE_TOP_NARRATIVES` | `12` | Default ranked narratives output |
+| `EAGLE_EYE_SOURCE_LIMIT` | `60` | Max events per source pull |
+| `EAGLE_EYE_CACHE_TTL_SECONDS` | `20` | Cache TTL to reduce repeated API calls |
 
 ## License
 
-See [LICENSE](LICENSE).
+See `LICENSE`.

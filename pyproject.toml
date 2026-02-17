@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "polymarket-mcp"
-version = "0.2.0"
-description = "MCP server for Polymarket sentiment analysis and market discovery"
+name = "market-eagle-eye-mcp"
+version = "0.3.0"
+description = "MCP + dashboard service for market narratives across Polymarket, Polygon, and squawk feeds"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -14,6 +14,8 @@ dependencies = [
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
     "python-dotenv>=1.0.0",
+    "fastapi>=0.116.0",
+    "uvicorn>=0.35.0",
 ]
 
 [project.optional-dependencies]
@@ -27,7 +29,9 @@ dev = [
 ]
 
 [project.scripts]
-polymarket-mcp = "polymarket_mcp.server:main"
+market-eagle-eye-mcp = "polymarket_mcp.server:run"
+polymarket-mcp = "polymarket_mcp.server:run"
+market-eagle-eye-dashboard = "polymarket_mcp.dashboard:run"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/polymarket_mcp"]

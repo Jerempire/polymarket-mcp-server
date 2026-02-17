@@ -1,7 +1,7 @@
 """
-Polymarket Sentiment Analysis MCP Server - Main entry point.
+Market Eagle Eye MCP Server - Main entry point.
 
-Provides read-only sentiment and market analysis tools via MCP.
+Provides read-only market discovery, sentiment, and narrative tools via MCP.
 """
 import asyncio
 import logging
@@ -13,7 +13,7 @@ from mcp.server import Server
 
 from .config import load_config, PolymarketConfig
 from .utils import get_rate_limiter
-from .tools import market_discovery, market_analysis, sentiment_digest
+from .tools import market_discovery, market_analysis, sentiment_digest, eagle_eye
 
 # Configure logging
 logging.basicConfig(
@@ -23,17 +23,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Global instances
-server = Server("polymarket-sentiment")
+server = Server("market-eagle-eye")
 config: Optional[PolymarketConfig] = None
 
 
 @server.list_tools()
 async def list_tools() -> list[types.Tool]:
-    """List available tools (15 read-only tools)."""
+    """List available tools."""
     tools = []
     tools.extend(market_discovery.get_tools())
     tools.extend(market_analysis.get_tools())
     tools.extend(sentiment_digest.get_tools())
+    tools.extend(eagle_eye.get_tools())
     return tools
 
 
@@ -53,6 +54,12 @@ async def list_resources() -> list[types.Resource]:
             description="Check API rate limit status",
             mimeType="application/json"
         ),
+        types.Resource(
+            uri="polymarket://eagle-eye-config",
+            name="Eagle Eye Config",
+            description="Current Eagle Eye source and scoring configuration",
+            mimeType="application/json"
+        ),
     ]
 
 
@@ -63,9 +70,9 @@ async def read_resource(uri: str) -> str:
 
     if uri == "polymarket://status":
         status_data = {
-            "server_version": "0.2.0",
-            "mode": "read-only-sentiment",
-            "tools_available": 15,
+            "server_version": "0.3.0",
+            "mode": "read-only-eagle-eye",
+            "tools_available": 18,
             "gamma_api_url": config.GAMMA_API_URL if config else None,
             "cache_ttl_seconds": config.SENTIMENT_CACHE_TTL_SECONDS if config else None,
         }
@@ -75,6 +82,28 @@ async def read_resource(uri: str) -> str:
         rate_limiter = get_rate_limiter()
         status = rate_limiter.get_status()
         return json.dumps(status, indent=2)
+
+    elif uri == "polymarket://eagle-eye-config":
+        if not config:
+            return json.dumps({"error": "Config not loaded"})
+        return json.dumps(
+            {
+                "window_minutes": config.EAGLE_EYE_WINDOW_MINUTES,
+                "top_narratives": config.EAGLE_EYE_TOP_NARRATIVES,
+                "source_limit": config.EAGLE_EYE_SOURCE_LIMIT,
+                "sources": {
+                    "polymarket": config.EAGLE_EYE_ENABLE_POLYMARKET,
+                    "polygon": config.EAGLE_EYE_ENABLE_POLYGON,
+                    "squawk": config.EAGLE_EYE_ENABLE_SQUAWK,
+                },
+                "polymarket_api": {
+                    "primary": config.POLYMARKET_PRIMARY_API_URL,
+                    "fallback": config.POLYMARKET_FALLBACK_API_URL,
+                    "paths": config.POLYMARKET_MARKETS_PATHS,
+                },
+            },
+            indent=2,
+        )
 
     else:
         return json.dumps({"error": f"Unknown resource: {uri}"})
@@ -100,6 +129,10 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> list[types.TextCont
         # Sentiment digest tools (3)
         elif name in ["get_sentiment_digest", "get_topic_sentiment", "get_biggest_movers"]:
             return await sentiment_digest.handle_tool(name, arguments)
+
+        # Eagle Eye tools (3)
+        elif name in ["get_eagle_eye_snapshot", "get_theme_breakdown", "get_source_health"]:
+            return await eagle_eye.handle_tool(name, arguments)
 
         else:
             raise ValueError(f"Unknown tool: {name}")
@@ -132,10 +165,12 @@ async def initialize_server() -> None:
         # Initialize rate limiter (singleton)
         get_rate_limiter()
         logger.info("Rate limiter initialized")
+        eagle_eye.initialize(config)
+        logger.info("Eagle Eye service initialized")
 
         logger.info("Server initialization complete!")
-        logger.info("Mode: READ-ONLY Sentiment Analysis")
-        logger.info("Available tools: 15 (7 Discovery, 5 Analysis, 3 Sentiment)")
+        logger.info("Mode: READ-ONLY Market Narrative Analysis")
+        logger.info("Available tools: 18 (7 Discovery, 5 Analysis, 3 Sentiment, 3 Eagle Eye)")
 
     except Exception as e:
         logger.error(f"Failed to initialize server: {e}")
